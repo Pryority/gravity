@@ -13,8 +13,8 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 export const metadata: Metadata = {
-  title: "React Native Smart Wallet Integration",
-  description: "For Coinbase Onchain Summer Hackathon",
+  title: "Gravity",
+  description: "Fair ERC20 Trading and Launch Platform",
 };
 
 export const viewport: Viewport = {
