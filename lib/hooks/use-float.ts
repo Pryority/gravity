@@ -1,12 +1,13 @@
 import { atom, useAtom } from "jotai";
-import { Address } from "viem";
+// import { Address } from "viem";
 
 export type TokenType = "ERC-20" | "ERC-1155";
 export type CurveType = "linear" | "exponential" | "logarithmic" | "flat price";
+export type Symbol = "WETH" | "DEGEN " | "ENJOY" | "USDC" | "OP" | string;
 
 export type FloatState = {
   erc: TokenType | null;
-  base: Address | null;
+  base: Symbol | null; // TODO: Turn symbol into address later on
   name: string | null;
   symbol: string | null;
   isRoyalties: boolean | null;
@@ -19,6 +20,10 @@ export type FloatState = {
     type: CurveType;
     rangeNum: number;
   } | null;
+  totalSupply: number | null;
+  creatorSupply: number | null;
+  startPrice: number | null;
+  endPrice: number | null;
 };
 
 const configAtom = atom<FloatState>({
@@ -29,9 +34,13 @@ const configAtom = atom<FloatState>({
   isRoyalties: false,
   newRoyalties: false,
   curve: {
-    type: "linear",
+    type: "exponential",
     rangeNum: 20,
   },
+  totalSupply: 69000000420,
+  creatorSupply: null,
+  startPrice: 0.01,
+  endPrice: 1,
 });
 
 export default function useFloat() {

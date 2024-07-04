@@ -7,68 +7,39 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import useFloat, { CurveType, FloatState } from "@/lib/hooks/use-float";
-import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import FloatPreview from "./FloatPreview";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Checkbox } from "./ui/checkbox";
-import RoyaltyTooltip from "./float/RoyaltyTooltip";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Slider } from "./ui/slider";
 import CurvePreview from "./CurvePreview";
 
-const tokens = [
-  { name: "Wrapped Ether", ticker: "WETH" },
-  { name: "Optimism", ticker: "OP" },
-  { name: "DEGEN", ticker: "DEGEN" },
-  { name: "Enjoy", ticker: "ENJOY" },
-];
-
 const FormSchema = z.object({
-  isRoyalties: z.boolean().default(false),
-  newRoyalties: z.boolean().default(false),
-  mintRoyalty: z.number().optional(),
-  burnRoyalty: z.number().optional(),
-  website: z.string().optional(),
-  x: z.string().optional(),
-  telegram: z.string().optional(),
   curveType: z.string(),
   curveRangeNum: z.number(),
+  isCreatorMinting: z.boolean().default(false),
+  totalSupply: z.number(),
+  creatorInitialSupply: z.number(),
+  startPrice: z.number(),
+  endPrice: z.number(),
 });
 
 export default function CurveForm() {
   const [float, setFloat] = useFloat();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
-    defaultValues: {
-      isRoyalties: false,
-      newRoyalties: false,
-      curveType: "linear",
-      curveRangeNum: 20,
-    },
+    defaultValues: {},
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
@@ -82,14 +53,14 @@ export default function CurveForm() {
     // });
   }
   return (
-    <div className="grid w-full gap-6 md:grid-cols-2">
+    <div className="grid w-full gap-6 xl:grid-cols-2">
       <CurvePreview />
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full space-y-6"
         >
-          <Card className="w-full max-w-2xl">
+          <Card>
             <CardHeader>
               <CardTitle>Float Curve Configuration</CardTitle>
               <CardDescription>
@@ -102,13 +73,21 @@ export default function CurveForm() {
                   control={form.control}
                   name="curveType"
                   render={({ field }) => (
-                    <FormItem className="space-y-3">
+                    <FormItem className="w-full space-y-3">
                       {/* <FormLabel>Notify me about...</FormLabel> */}
                       <FormControl>
                         <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex space-x-6"
+                          onValueChange={(e) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              curve: {
+                                type: e as CurveType,
+                                rangeNum: p.curve?.rangeNum ?? 20,
+                              },
+                            }));
+                          }}
+                          defaultValue={"exponential"}
+                          className="grid w-full grid-cols-2 md:flex md:flex-row md:space-x-6"
                         >
                           <FormItem className="flex items-center space-x-2 space-y-0">
                             <FormControl>
@@ -179,10 +158,108 @@ export default function CurveForm() {
                   )}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="totalSupply"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Total Supply</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="69000000420"
+                          {...field}
+                          value={float.totalSupply ?? 69000000420}
+                          onChange={(e) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              totalSupply: parseInt(e.target.value),
+                            }));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="creatorInitialSupply"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Creator Supply</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="42069"
+                          {...field}
+                          value={float.creatorSupply ?? ""}
+                          onChange={(e) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              creatorSupply: parseInt(e.target.value),
+                            }));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="startPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Starting Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="0.01"
+                          {...field}
+                          value={float.startPrice ?? ""}
+                          onChange={(e) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              startPrice: parseFloat(e.target.value),
+                            }));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="endPrice"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ending Price</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="1"
+                          {...field}
+                          value={float.endPrice ?? ""}
+                          onChange={(e) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              endPrice: parseFloat(e.target.value),
+                            }));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </CardContent>
             <CardFooter>
               <Button type="submit" className="ml-auto">
-                Float Token
+                Review Float
               </Button>
             </CardFooter>
           </Card>

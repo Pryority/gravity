@@ -37,15 +37,24 @@ import { z } from "zod";
 import { Checkbox } from "./ui/checkbox";
 import RoyaltyTooltip from "./float/RoyaltyTooltip";
 import Link from "next/link";
+import FloatImageUpload from "./FloatImageUpload";
 
 const tokens = [
   { name: "Wrapped Ether", ticker: "WETH" },
+  { name: "USD Coin", ticker: "USDC" },
   { name: "Optimism", ticker: "OP" },
   { name: "DEGEN", ticker: "DEGEN" },
   { name: "Enjoy", ticker: "ENJOY" },
 ];
 
 const FormSchema = z.object({
+  base: z.union([
+    z.literal("WETH"),
+    z.literal("DEGEN "),
+    z.literal("ENJOY"),
+    z.literal("USDC"),
+    z.literal("OP"),
+  ]),
   isRoyalties: z.boolean().default(false),
   newRoyalties: z.boolean().default(false),
   mintRoyalty: z.number().optional(),
@@ -76,13 +85,13 @@ export default function FloatForm() {
     // });
   }
   return (
-    <div className="grid w-full gap-6 md:grid-cols-2">
+    <div className="grid w-full gap-6 xl:grid-cols-2">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="w-full space-y-6"
         >
-          <Card className="w-full max-w-2xl">
+          <Card>
             <CardHeader>
               <CardTitle>Submit Token Information</CardTitle>
               <CardDescription>
@@ -125,21 +134,52 @@ export default function FloatForm() {
                   </TabsContent>
                 </Tabs>
               </div>
-              <div className="mt-4 flex w-full flex-col gap-4">
-                <Label htmlFor="name">Choose a Base Asset</Label>
-                <Select>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Wrapped Ether (WETH)" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tokens.map((t) => (
-                      <SelectItem
-                        key={t.ticker}
-                        value={t.ticker}
-                      >{`${t.name} (${t.ticker})`}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex w-full flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="base"
+                  render={({ field }) => (
+                    <FormItem
+                      onChange={() => {
+                        console.log("change");
+                        setFloat((p: FloatState) => ({
+                          ...p,
+                          isRoyalties: field.value ? true : false,
+                        }));
+                      }}
+                      className="flex w-full flex-col gap-2"
+                    >
+                      <div className="space-y-0.5">
+                        <FormLabel>
+                          Choose a Base Asset <RoyaltyTooltip />
+                        </FormLabel>
+                      </div>
+                      <FormControl>
+                        <Select
+                          onValueChange={(val) => {
+                            setFloat((p: FloatState) => ({
+                              ...p,
+                              base: val,
+                            }));
+                          }}
+                          defaultValue={"WETH"}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Wrapped Ether (WETH)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {tokens.map((t) => (
+                              <SelectItem
+                                key={t.ticker}
+                                value={t.ticker}
+                              >{`${t.name} (${t.ticker})`}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -148,7 +188,7 @@ export default function FloatForm() {
                   </Label>
                   <Input
                     id="name"
-                    placeholder="Enter token name"
+                    placeholder="e.g. MoonCoin"
                     value={float.name ?? ""}
                     onChange={(e) => {
                       setFloat((p: FloatState) => ({
@@ -164,7 +204,7 @@ export default function FloatForm() {
                   </Label>
                   <Input
                     id="symbol"
-                    placeholder="Enter token symbol"
+                    placeholder="e.g. MNC"
                     value={float.symbol ?? ""}
                     onChange={(e) => {
                       setFloat((p: FloatState) => ({
@@ -308,11 +348,7 @@ export default function FloatForm() {
                   <></>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="launch-amount">Launch Amount (ETH)</Label>
-                  <Input id="launch-amount" type="number" placeholder="0.0" />
-                </div>
+              <div className="grid w-full grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <FormField
                     control={form.control}
@@ -402,25 +438,17 @@ export default function FloatForm() {
                   className="min-h-[100px]"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-full space-y-2 rounded-lg border p-3">
                   <Label htmlFor="image">Token Image</Label>
-                  <Input id="image" type="file" />
+                  <FloatImageUpload />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="total-supply">Total Supply</Label>
-                  <Input id="total-supply" type="number" placeholder="0" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="first-buy">First Buy on Deploy (ETH)</Label>
-                <Input id="first-buy" type="number" placeholder="0.0" />
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="justify-end">
               <Link href={"/float/curve"}>
                 <Button type="submit" className="ml-auto">
-                  Finalize Float
+                  Continue
                 </Button>
               </Link>
             </CardFooter>

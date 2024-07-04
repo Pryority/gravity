@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 export default function FloatStepDots() {
   const pathName = usePathname();
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 pb-8">
+    <div className="mb-4 mt-2 flex items-center justify-between">
+      <div className="flex items-center gap-2">
         <Link
           href={"/float"}
           className={cn(
@@ -23,8 +23,13 @@ export default function FloatStepDots() {
             pathName === "/float/curve" ? "bg-primary" : "bg-secondary",
           )}
         />
-        <div className="h-3 w-3 rounded-full bg-secondary" />
-        <div className="h-3 w-3 rounded-full bg-secondary" />
+        <Link
+          href={"/float/review"}
+          className={cn(
+            "h-3 w-3 rounded-full",
+            pathName === "/float/review" ? "bg-primary" : "bg-secondary",
+          )}
+        />
       </div>
     </div>
   );
