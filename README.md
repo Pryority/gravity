@@ -4,4 +4,4 @@
 
 ---
 
-![Demo](./public/demo-banner.png)
+![Demo](./public/demo.png)
