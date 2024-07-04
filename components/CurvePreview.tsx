@@ -88,7 +88,7 @@ export default function CurvePreview() {
       </CardHeader>
       <CardContent>
         <div className="flex w-full flex-col items-center gap-4">
-          <div className="relative min-h-40 w-full rounded-sm bg-secondary sm:hidden md:flex">
+          <div className="relative min-h-40 w-full rounded-sm bg-secondary sm:hidden">
             <LineChart
               id="curve"
               width={280}
